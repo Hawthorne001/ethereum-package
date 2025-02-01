@@ -25,12 +25,12 @@ participants:
     cl_max_cpu: 0
     cl_min_mem: 0
     cl_max_mem: 0
+    supernode: false
     use_separate_vc: true
 # Validator
     vc_type: lighthouse
     vc_image: sigp/lighthouse:latest-unstable
     vc_log_level: ""
-    vc_count: 1
     vc_extra_env_vars: {}
     vc_extra_labels: {}
     vc_extra_params: []
@@ -40,6 +40,18 @@ participants:
     vc_min_mem: 0
     vc_max_mem: 0
     validator_count: null
+    use_remote_signer: false
+# Remote signer
+    remote_signer_type: web3signer
+    remote_signer_image: consensys/web3signer:latest
+    remote_signer_extra_env_vars: {}
+    remote_signer_extra_labels: {}
+    remote_signer_extra_params: []
+    remote_signer_tolerations: []
+    remote_signer_min_cpu: 0
+    remote_signer_max_cpu: 0
+    remote_signer_min_mem: 0
+    remote_signer_max_mem: 0
 # participant specific
     node_selectors: {}
     tolerations: []
@@ -75,14 +87,15 @@ network_params:
   shard_committee_period: 256
   deneb_fork_epoch: 0
   electra_fork_epoch: 100000000
-  eip7594_fork_epoch: 100000001
-  eip7594_fork_version: "0x60000038"
+  fulu_fork_epoch: 100000001
   network_sync_base_url: https://snapshots.ethpandaops.io/
-  eof_activation_epoch: ""
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
-  max_blobs_per_block: 6
+  max_blobs_per_block_electra: 9
+  target_blobs_per_block_electra: 6
+  max_blobs_per_block_fulu: 12
+  target_blobs_per_block_fulu: 9
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
@@ -91,8 +104,21 @@ dora_params:
   image: ""
 tx_spammer_params:
   tx_spammer_extra_args: []
-goomy_blob_params:
-  goomy_blob_args: []
+spamoor_blob_params:
+  spamoor_extra_args: []
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+grafana_params:
+  additional_dashboards: []
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
 assertoor_params:
   image: ""
   run_stability_check: false
@@ -108,14 +134,13 @@ snooper_enabled: false
 ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
-grafana_additional_dashboards: []
 persistent: false
 mev_type: null
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_builder_image: ethpandaops/flashbots-builder:main
   mev_builder_cl_image: sigp/lighthouse:latest
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
   mev_relay_api_extra_args: []
   mev_relay_housekeeper_extra_args: []
@@ -150,6 +175,8 @@ global_node_selectors: {}
 keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
+ethereum_genesis_generator_params:
+  image: ethpandaops/ethereum-genesis-generator:3.5.1
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
@@ -161,6 +188,9 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
-  additional_services:
+  remote_signer:
     enabled: false
     public_port_start: 35000
+  additional_services:
+    enabled: false
+    public_port_start: 36000
